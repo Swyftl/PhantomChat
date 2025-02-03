@@ -1,31 +1,36 @@
-const { app, BrowserWindow, Notification } = require('electron/main');
-const path = require('node:path')
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
 
-const createWindow = () => {
-  const win = new BrowserWindow({
-    width: 1280,
-    height: 720,
-    titleBarStyle: 'hiddeninset',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+function createWindow() {
+    const win = new BrowserWindow({
+        width: 1200,
+        height: 800,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
 
-  win.loadFile('index.html')
+    win.loadFile('index.html');
 }
 
-app.whenReady().then(() => {
-  createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
-  })
-})
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
+});
+
+// Handle IPC events
+ipcMain.on('add-server', (event, data) => {
+    console.log('New server data:', data);
+    // Add server logic here
+});
