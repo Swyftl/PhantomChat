@@ -18,8 +18,49 @@ body {
     padding: 12px 0;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
     gap: 8px;
+    height: 100vh;
+    overflow: hidden; /* Add this to prevent container overflow */
+}
+
+.servers-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-height: calc(100vh - 200px); /* Adjust space for home, footer buttons */
+    overflow-y: auto;
+    padding: 8px 0;
+    margin-top: 0; /* Add this to ensure content starts at top */
+    justify-content: flex-start; /* Add this to align content to top */
+}
+
+/* Add custom scrollbar styling */
+.servers-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.servers-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.servers-list::-webkit-scrollbar-thumb {
+    background: #202225;
+    border-radius: 2px;
+}
+
+.servers-list::-webkit-scrollbar-thumb:hover {
+    background: #2f3136;
+}
+
+.servers-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
 }
 
 .server-icon {
@@ -203,6 +244,10 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
+    padding: 20px;
+    background-color: #36393f;
+    z-index: 1;
 }
 
 .close-modal {
@@ -287,4 +332,104 @@ body {
 #server-port::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.settings-content {
+    width: 800px;
+    height: 600px;
+    margin: 5% auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-body {
+    display: flex;
+    flex: 1;
+    height: calc(100% - 60px); /* Account for header height */
+}
+
+.settings-sidebar {
+    width: 200px;
+    background-color: #2f3136;
+    padding: 20px 0;
+    height: 100%;
+}
+
+.settings-section {
+    padding: 10px 20px;
+    color: #b9bbbe;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-section:hover {
+    background-color: #36393f;
+    color: #dcddde;
+}
+
+.settings-section.active {
+    background-color: #454950;
+    color: #fff;
+}
+
+.settings-content-area {
+    flex: 1;
+    padding: 20px;
+    background-color: #36393f;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.settings-panel {
+    display: none;
+}
+
+.settings-panel.active {
+    display: block;
+}
+
+.settings-panel h3 {
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+select {
+    width: 200px;
+    padding: 8px;
+    background-color: #40444b;
+    border: 1px solid #202225;
+    border-radius: 3px;
+    color: #dcddde;
+    outline: none;
+}
+
+select:focus {
+    border-color: #5865f2;
+}
+
+.close-settings {
+    color: #72767d;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.close-settings:hover {
+    color: #dcddde;
+}
+
+.message {
+    padding: 8px;
+    margin: 4px 0;
+}
+
+.message-username {
+    font-weight: 500;
+    color: #dcddde;
+    margin-right: 8px;
+}
+
+.message-content {
+    color: #dcddde;
 }

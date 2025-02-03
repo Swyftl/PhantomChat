@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
-    "websocket": "^1.0.35"
+    "websocket": "^1.0.34",
+    "ws": "^8.2.3",
+    "websocket-client": "^1.0.0"
   }
 }
