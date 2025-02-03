@@ -1,7 +1,8 @@
-const { contextBridge } = require('electron/renderer')
+const { contextBridge, ipcRenderer } = require('electron')
 
-contextBridge.exposeInMainWorld('versions', {
-  node: () => process.versions.node,
-  chrome: () => process.versions.chrome,
-  electron: () => process.versions.electron
-})
+contextBridge.exposeInMainWorld('electron', {
+    addServer: () => ipcRenderer.send('add-server'),
+    switchServer: (serverId) => ipcRenderer.send('switch-server', serverId),
+    switchChannel: (channelId) => ipcRenderer.send('switch-channel', channelId),
+    sendMessage: (message) => ipcRenderer.send('send-message', message)
+});

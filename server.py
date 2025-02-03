@@ -6,7 +6,7 @@ async def handler(websocket):
     while True:
         try:
             message = await websocket.recv()
-        except ConnectionClosedOk:
+        except ConnectionClosedOK:
             break
         async for message in message:
             print(message)

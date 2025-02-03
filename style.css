@@ -120,6 +120,7 @@ body {
     border: none;
     background-color: #40444b;
     color: #dcddde;
+    outline: none;
 }
 
 #users-container {
