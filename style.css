@@ -1,0 +1,178 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    background-color: #36393f;
+    color: #dcddde;
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#servers-container {
+    width: 72px;
+    background-color: #202225;
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.server-icon {
+    width: 48px;
+    height: 48px;
+    background-color: #36393f;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-radius 0.2s;
+    color: #dcddde;
+}
+
+.server-icon:hover {
+    border-radius: 16px;
+    background-color: #5865f2;
+}
+
+.server-separator {
+    height: 2px;
+    background-color: #36393f;
+    width: 32px;
+    margin: 4px 0;
+}
+
+#channels-container {
+    width: 240px;
+    background-color: #2f3136;
+    display: flex;
+    flex-direction: column;
+}
+
+.channel-header {
+    padding: 16px;
+    height: 48px;
+    border-bottom: 1px solid #202225;
+}
+
+.channel-list {
+    padding: 8px;
+    flex-grow: 1;
+}
+
+.channel-category {
+    margin-bottom: 16px;
+}
+
+.channel-category > span {
+    color: #8e9297;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px;
+}
+
+.channel {
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #8e9297;
+}
+
+.channel:hover {
+    background-color: #36393f;
+    color: #dcddde;
+}
+
+#chat-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid #202225;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.messages-container {
+    flex-grow: 1;
+    padding: 16px;
+}
+
+.message-input {
+    margin: 0 16px 24px;
+}
+
+.message-input input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #40444b;
+    color: #dcddde;
+}
+
+#users-container {
+    width: 240px;
+    background-color: #2f3136;
+    padding: 16px 8px;
+}
+
+.users-header h3 {
+    color: #8e9297;
+    font-size: 12px;
+    margin-bottom: 16px;
+    padding: 0 8px;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.user:hover {
+    background-color: #36393f;
+}
+
+.user img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.user-profile {
+    height: 52px;
+    background-color: #292b2f;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 600;
+}
+
+.status {
+    font-size: 12px;
+    color: #b9bbbe;
+}
