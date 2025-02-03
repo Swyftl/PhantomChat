@@ -1,16 +1,15 @@
 {
   "name": "phantom-chat",
-  "version": "0.1.0",
-  "description": "A self hosted chat app for you and your friends",
-  "license": "ISC",
-  "author": "Swyftl",
-  "type": "commonjs",
-  "main": "main.js",
+  "productName": "phantom-chat",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.1",
@@ -21,10 +20,15 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.1",
     "@electron-forge/plugin-fuses": "^7.6.1",
     "@electron/fuses": "^1.8.0",
-    "electron": "^34.0.2"
+    "electron": "34.0.2"
   },
+  "keywords": [],
+  "author": {
+    "name": "Swyftl",
+    "email": "68863847+Swyftl@users.noreply.github.com"
+  },
+  "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1",
-    "websocket": "^1.0.35"
+    "electron-squirrel-startup": "^1.0.1"
   }
 }
