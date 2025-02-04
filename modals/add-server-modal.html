@@ -19,20 +19,48 @@
             </form>
 
             <!-- Page 2: Authentication -->
-            <form id="server-auth-form" class="modal-page" style="display: none;">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required>
+            <div id="auth-container" class="modal-page" style="display: none;">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="register">Register</button>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <div class="button-group">
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="submit" class="submit-btn">Connect</button>
-                </div>
-            </form>
+
+                <!-- Login Form -->
+                <form id="server-auth-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-btn">Back</button>
+                        <button type="submit" class="submit-btn">Login</button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="server-register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-btn">Back</button>
+                        <button type="submit" class="submit-btn">Register</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

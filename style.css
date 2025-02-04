@@ -35,6 +35,7 @@ body {
     padding: 8px 0;
     margin-top: 0; /* Add this to ensure content starts at top */
     justify-content: flex-start; /* Add this to align content to top */
+    min-height: 50px; /* Add minimum height for empty state */
 }
 
 /* Add custom scrollbar styling */
@@ -81,6 +82,11 @@ body {
     background-color: #5865f2;
 }
 
+.server-icon.active {
+    background-color: #5865f2;
+    border-radius: 16px;
+}
+
 .server-separator {
     height: 2px;
     background-color: #36393f;
@@ -123,6 +129,17 @@ body {
     border-radius: 4px;
     cursor: pointer;
     color: #8e9297;
+    transition: background-color 0.2s ease;
+}
+
+.channel.active {
+    background-color: rgba(79, 84, 92, 0.32);
+    color: #fff;
+    font-weight: 500;
+}
+
+.channel:hover:not(.active) {
+    background-color: rgba(79, 84, 92, 0.16);
 }
 
 .channel:hover {
@@ -134,6 +151,8 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -148,6 +167,27 @@ body {
 .messages-container {
     flex-grow: 1;
     padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #202225 transparent;
+}
+
+.messages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background-color: #202225;
+    border-radius: 4px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background-color: #2f3136;
 }
 
 .message-input {
@@ -432,4 +472,46 @@ select:focus {
 
 .message-content {
     color: #dcddde;
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #202225;
+}
+
+.auth-tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    color: #8e9297;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+}
+
+.auth-tab:hover {
+    color: #dcddde;
+}
+
+.auth-tab.active {
+    color: #fff;
+}
+
+.auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #5865f2;
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
 }
