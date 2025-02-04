@@ -235,14 +235,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Channel buttons
-    document.getElementById('general-channel').addEventListener('click', () => {
+    // Remove these static channel button handlers
+    /* document.getElementById('general-channel').addEventListener('click', () => {
         window.electronAPI.switchChannel('general');
     });
 
     document.getElementById('chat-channel').addEventListener('click', () => {
         window.electronAPI.switchChannel('chat');
-    });
+    }); */
 
     // Message input
     const messageInput = document.getElementById('message-input-field');
@@ -250,49 +250,60 @@ document.addEventListener('DOMContentLoaded', () => {
     // Server connection status handler
     window.electronAPI.onServerConnection((status) => {
         if (status.success) {
-            // Create server icon using status data
-            const serverIcon = document.createElement('div');
-            serverIcon.className = 'server-icon';
-            serverIcon.textContent = status.username.substring(0, 2).toUpperCase();
-            const serverId = `${status.ip}:${status.port}`;  // Use status data instead of state
-            serverIcon.dataset.serverId = serverId;
-            
-            // Remove existing server icon if it exists
-            const existingServer = document.querySelector(
-                `.server-icon[data-server-id="${serverId}"]`
-            );
-            if (existingServer) {
-                existingServer.remove();
-            }
-            
-            // Update state with server information
-            state.currentServer = {
+            const serverId = `${status.ip}:${status.port}`;
+            const serverData = {
+                id: serverId,
+                name: status.username,
                 ip: status.ip,
                 port: status.port,
-                username: status.username
+                username: status.username,
+                channels: status.channels || ['general']
             };
-            
-            document.querySelector('.servers-list').appendChild(serverIcon);
-            
-            // Update username display
-            state.currentUsername = status.username;
-            document.getElementById('current-username').textContent = state.currentUsername;
 
-            // Clear and load message history if provided
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = '';
-            
-            if (status.history && Array.isArray(status.history)) {
-                status.history.forEach(message => {
-                    displayMessage(message);
+            // Add server to state if not already present
+            if (!state.servers.has(serverId)) {
+                state.servers.set(serverId, serverData);
+                
+                // Create and add server icon
+                const serverIcon = document.createElement('div');
+                serverIcon.className = 'server-icon';
+                serverIcon.textContent = status.username.substring(0, 2).toUpperCase();
+                serverIcon.dataset.serverId = serverId;
+                
+                // Add click handler
+                serverIcon.addEventListener('click', () => {
+                    document.querySelectorAll('.server-icon').forEach(icon => 
+                        icon.classList.remove('active'));
+                    serverIcon.classList.add('active');
+                    
+                    state.currentServer = {
+                        ip: status.ip,
+                        port: status.port,
+                        username: status.username
+                    };
+                    
+                    updateServerContent(serverData);
                 });
+                
+                document.querySelector('.servers-list').appendChild(serverIcon);
+
+                // If this is the first server, automatically select it
+                if (state.servers.size === 1) {
+                    serverIcon.click();
+                }
             }
 
-            // Set general channel as active by default
-            const generalChannel = document.getElementById('general-channel');
-            if (generalChannel) {
-                document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
-                generalChannel.classList.add('active');
+            // Update current server state if this is the active server
+            if (!state.currentServer || 
+                (state.currentServer.ip === status.ip && 
+                 state.currentServer.port === status.port)) {
+                state.currentServer = {
+                    ip: status.ip,
+                    port: status.port,
+                    username: status.username
+                };
+                state.currentUsername = status.username;
+                document.getElementById('current-username').textContent = status.username;
             }
         } else {
             alert('Failed to connect to server');
@@ -366,59 +377,29 @@ document.addEventListener('DOMContentLoaded', () => {
         state.servers.delete(serverId);
     }
 
-    // Handle new server connections
+    // Handle new server connections (remove or modify this if not needed)
     window.electronAPI.onServerAdded((server) => {
-        console.log('Adding server:', server);
-        
-        // Remove existing instance if any
-        removeExistingServer(server.id);
-
-        const serverIcon = document.createElement('div');
-        serverIcon.className = 'server-icon';
-        serverIcon.textContent = server.name.substring(0, 2).toUpperCase();
-        serverIcon.dataset.serverId = server.id;
-        
-        serverIcon.addEventListener('click', () => {
-            // Switch active server
-            document.querySelectorAll('.server-icon').forEach(icon => 
-                icon.classList.remove('active'));
-            serverIcon.classList.add('active');
-            
-            // Switch to this server
-            const serverData = state.servers.get(server.id);
-            if (serverData) {
-                state.currentServer = {
-                    ip: serverData.ip,
-                    port: serverData.port,
-                    username: serverData.username
-                };
-                window.electronAPI.switchServer(server.id);
-                updateServerContent(serverData);
-            }
-        });
-
-        serversList.appendChild(serverIcon);
-        state.servers.set(server.id, server);
-        console.log('Current servers:', state.servers);
+        console.log('Server added:', server);
+        // The server connection is now handled by onServerConnection
     });
 
     function updateServerContent(server) {
         // Update channel list
         const channelList = document.querySelector('.channel-list');
-        channelList.innerHTML = server.channels.map(channel => `
-            <div class="channel" data-channel="${channel}">
-                <i class="fas fa-hashtag"></i>
-                <span>${channel}</span>
+        channelList.innerHTML = `
+            <div class="channel-category">
+                <span>TEXT CHANNELS</span>
+                ${server.channels.map(channel => `
+                    <div class="channel" data-channel="${channel}">
+                        <i class="fas fa-hashtag"></i>
+                        <span>${channel}</span>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
+        `;
 
         // Add click handlers to all channels
         document.querySelectorAll('.channel').forEach(channelElement => {
-            // Mark general as active by default for new servers
-            if (channelElement.dataset.channel === 'general') {
-                channelElement.classList.add('active');
-            }
-            
             channelElement.addEventListener('click', () => {
                 // Update active channel visual
                 document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
@@ -430,9 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('current-channel').textContent = channelName;
                 document.getElementById('message-input-field').placeholder = `Message #${channelName}`;
                 
-                // Clear messages container for new channel
-                document.getElementById('messages-container').innerHTML = '';
-
                 // Request channel history
                 if (state.currentServer) {
                     window.electronAPI.requestChannelHistory({
@@ -442,6 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             });
+
+            // Set first channel as active by default
+            if (channelElement === document.querySelector('.channel')) {
+                channelElement.click();
+            }
         });
     }
 
@@ -457,46 +440,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update the built-in channel buttons to use the same logic
-    document.getElementById('general-channel').addEventListener('click', () => {
-        // Update active channel visual
-        document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
-        document.getElementById('general-channel').classList.add('active');
+    // Add refresh button handler
+    const refreshBtn = document.getElementById('refresh-servers');
+    refreshBtn.addEventListener('click', async () => {
+        // Add spinning animation
+        refreshBtn.classList.add('refreshing');
         
-        // Update state and UI
-        state.currentChannel = 'general';
-        document.getElementById('current-channel').textContent = 'general';
-        document.getElementById('message-input-field').placeholder = 'Message #general';
-        
-        // Clear and request history
-        document.getElementById('messages-container').innerHTML = '';
-        if (state.currentServer) {
-            window.electronAPI.requestChannelHistory({
-                channel: 'general',
-                serverIp: state.currentServer.ip,
-                serverPort: state.currentServer.port
-            });
-        }
-    });
+        // Clear current servers
+        const serversList = document.querySelector('.servers-list');
+        serversList.innerHTML = '';
+        state.servers.clear();
 
-    document.getElementById('chat-channel').addEventListener('click', () => {
-        // Update active channel visual
-        document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
-        document.getElementById('chat-channel').classList.add('active');
-        
-        // Update state and UI
-        state.currentChannel = 'chat';
-        document.getElementById('current-channel').textContent = 'chat';
-        document.getElementById('message-input-field').placeholder = 'Message #chat';
-        
-        // Clear and request history
-        document.getElementById('messages-container').innerHTML = '';
-        if (state.currentServer) {
-            window.electronAPI.requestChannelHistory({
-                channel: 'chat',
-                serverIp: state.currentServer.ip,
-                serverPort: state.currentServer.port
-            });
+        try {
+            // Request server refresh
+            await window.electronAPI.refreshServers();
+        } finally {
+            // Remove spinning animation after a minimum time
+            setTimeout(() => {
+                refreshBtn.classList.remove('refreshing');
+            }, 500);
         }
     });
 });

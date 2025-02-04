@@ -515,3 +515,21 @@ select:focus {
 .auth-form.active {
     display: block;
 }
+
+#refresh-servers {
+    margin-bottom: 8px;
+    transition: transform 0.3s ease;
+}
+
+#refresh-servers:hover {
+    transform: rotate(180deg);
+}
+
+#refresh-servers.refreshing {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

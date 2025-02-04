@@ -21,16 +21,17 @@ async function createWindow() {
             }
         });
 
-        // Load the index.html file
         await mainWindow.loadFile('index.html');
         
-        // Connect to saved servers after window loads
-        const config = await configManager.loadConfig();
-        config.servers.forEach(server => {
-            connectToServer(server, mainWindow.webContents);
+        // Wait for window to finish loading before connecting to servers
+        mainWindow.webContents.on('did-finish-load', async () => {
+            const config = await configManager.loadConfig();
+            // Connect to each saved server
+            for (const server of config.servers) {
+                connectToServer(server, mainWindow.webContents);
+            }
         });
 
-        // Debug: Open DevTools
         mainWindow.webContents.openDevTools();
     } catch (error) {
         console.error('Error creating window:', error);
@@ -61,14 +62,17 @@ app.on('window-all-closed', () => {
 function connectToServer(serverDetails, sender) {
     const serverId = `${serverDetails.ip}:${serverDetails.port}`;
     
-    // Check if server is already connected
+    // Instead of early return for connected servers, update UI
     if (connectedServers.has(serverId)) {
         console.log('Server already connected:', serverId);
-        // Send existing server info to update UI
-        sender.send('server-added', {
-            id: serverId,
-            name: serverDetails.username,
-            channels: wsClients.get(serverId)?.channels || ['general', 'chat']
+        const wsClient = wsClients.get(serverId);
+        // Send server info to update UI
+        sender.send('server-connection-status', {
+            success: true,
+            username: serverDetails.username,
+            channels: wsClient?.channels || ['general'],
+            ip: serverDetails.ip,
+            port: serverDetails.port
         });
         return;
     }
@@ -232,4 +236,20 @@ ipcMain.handle('load-modal-file', async (event, modalName) => {
         console.error('Error loading modal file:', error);
         return null;
     }
+});
+
+// Add refresh servers handler
+ipcMain.handle('refresh-servers', async (event) => {
+    // Clear existing connections
+    wsClients.forEach(client => client.close());
+    wsClients.clear();
+    connectedServers.clear();
+
+    // Load and reconnect to saved servers
+    const config = await configManager.loadConfig();
+    for (const server of config.servers) {
+        connectToServer(server, event.sender);
+    }
+    
+    return true;
 });

@@ -23,11 +23,16 @@ class User:
 class ChatServer:
     def __init__(self):
         self.users: Dict[str, User] = {}
-        self.channels: Dict[str, Set[str]] = {
-            "general": set(),
-            "chat": set()
-        }
+        self.channels: Dict[str, Set[str]] = {}
         self.db = Database()
+        asyncio.create_task(self.init_channels())
+
+    async def init_channels(self):
+        """Initialize channels from database."""
+        channels = await self.db.get_channels()
+        for channel in channels:
+            self.channels[channel] = set()
+        logger.info(f"Initialized channels: {list(self.channels.keys())}")
 
     async def register_user(self, username: str, password: str, websocket) -> bool:
         logger.info(f"Attempting to register user: {username}")
@@ -45,10 +50,11 @@ class ChatServer:
 
     async def authenticate(self, username: str, password: str) -> bool:
         logger.info(f"Attempting to authenticate user: {username}")
-        # Check credentials against database
         if await self.db.verify_user(username, password):
             if username not in self.users:
-                # User exists in DB but not in memory
+                # When a user joins, add them to all channels
+                for channel in self.channels.keys():
+                    self.channels[channel].add(username)
                 return True
             return True
         return False

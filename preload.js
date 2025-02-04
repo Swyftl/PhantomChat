@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setPrivacySetting: (setting, value) => ipcRenderer.send('set-privacy-setting', { setting, value }),
     loadModalFile: (modalName) => ipcRenderer.invoke('load-modal-file', modalName),
     requestChannelHistory: (data) => ipcRenderer.send('request-channel-history', data),
+    refreshServers: () => ipcRenderer.invoke('refresh-servers'),
     
     // Event listeners
     onServerConnection: (callback) => 

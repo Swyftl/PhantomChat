@@ -30,6 +30,21 @@ class Database:
                      timestamp DATETIME,
                      FOREIGN KEY(username) REFERENCES users(username))''')
 
+                # Create channels table
+                cursor.execute('''CREATE TABLE IF NOT EXISTS channels
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     name TEXT UNIQUE NOT NULL,
+                     description TEXT,
+                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+
+                # Insert default channels if they don't exist
+                cursor.execute('''INSERT OR IGNORE INTO channels (name, description)
+                    VALUES 
+                    ("general", "General discussion"),
+                    ("announcements", "Server announcements"),
+                    ("chat", "Casual chat"),
+                    ("help", "Help and support")''')
+
                 conn.commit()
                 logger.info("Database initialized successfully")
         except sqlite3.Error as e:
@@ -107,3 +122,28 @@ class Database:
         except Exception as e:
             logger.error(f"Error retrieving channel history: {e}")
             return []
+
+    async def get_channels(self) -> list:
+        """Get all available channels."""
+        try:
+            async with aiosqlite.connect(self.db_file) as db:
+                async with db.execute('SELECT name FROM channels ORDER BY created_at') as cursor:
+                    channels = await cursor.fetchall()
+                    return [channel[0] for channel in channels]
+        except Exception as e:
+            logger.error(f"Error getting channels: {e}")
+            return ["general"]  # Fallback to default channel
+
+    async def add_channel(self, name: str, description: str = "") -> bool:
+        """Add a new channel."""
+        try:
+            async with aiosqlite.connect(self.db_file) as db:
+                await db.execute(
+                    'INSERT INTO channels (name, description) VALUES (?, ?)',
+                    (name, description)
+                )
+                await db.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error adding channel: {e}")
+            return False
