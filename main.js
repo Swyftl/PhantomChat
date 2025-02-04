@@ -253,3 +253,5 @@ ipcMain.handle('refresh-servers', async (event) => {
     
     return true;
 });
+
+if (require('electron-squirrel-startup')) app.quit();

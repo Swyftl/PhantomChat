@@ -7,11 +7,10 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --debug",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.1",
@@ -27,7 +26,34 @@
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
     "websocket": "^1.0.34",
-    "ws": "^8.2.3",
-    "websocket-client": "^1.0.0"
+    "websocket-client": "^1.0.0",
+    "ws": "^8.2.3"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "electron_quick_start"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
