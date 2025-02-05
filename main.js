@@ -62,6 +62,13 @@ app.on('window-all-closed', () => {
 function connectToServer(serverDetails, sender) {
     const serverId = `${serverDetails.ip}:${serverDetails.port}`;
     
+    // Save server details when connecting
+    if (serverDetails.type === 'auth') {
+        configManager.addServer(serverDetails).catch(err => {
+            console.error('Error saving server config:', err);
+        });
+    }
+
     // Instead of early return for connected servers, update UI
     if (connectedServers.has(serverId)) {
         console.log('Server already connected:', serverId);
@@ -92,6 +99,12 @@ function connectToServer(serverDetails, sender) {
         sender.send('chat-message', message);
     });
 
+    // Add user status handler
+    wsClient.on('user_status', (data) => {
+        console.log('Received user status update:', data);
+        sender.send('user-status', data);
+    });
+
     // Consolidated auth response handler
     wsClient.on('auth_response', (response) => {
         console.log('Received auth response:', response);
@@ -116,7 +129,9 @@ function connectToServer(serverDetails, sender) {
                 username: serverDetails.username,
                 channels: response.channels,
                 ip: serverDetails.ip,
-                port: serverDetails.port
+                port: serverDetails.port,
+                online_users: response.online_users || [],
+                offline_users: response.offline_users || []
             });
         } else {
             console.error('Authentication failed:', response.error);
@@ -238,19 +253,41 @@ ipcMain.handle('load-modal-file', async (event, modalName) => {
     }
 });
 
-// Add refresh servers handler
+// Update refresh servers handler
 ipcMain.handle('refresh-servers', async (event) => {
-    // Clear existing connections
-    wsClients.forEach(client => client.close());
-    wsClients.clear();
-    connectedServers.clear();
+    try {
+        // Clear existing connections but maintain config
+        wsClients.forEach(client => client.close());
+        wsClients.clear();
+        connectedServers.clear();
 
-    // Load and reconnect to saved servers
-    const config = await configManager.loadConfig();
-    for (const server of config.servers) {
-        connectToServer(server, event.sender);
+        // Load saved servers from config
+        const config = await configManager.loadConfig();
+        console.log('Loaded servers from config:', config.servers);
+
+        // Reconnect to each saved server
+        for (const server of config.servers) {
+            const serverWithAuth = {
+                ...server,
+                type: 'auth'  // Add auth type for reconnection
+            };
+            connectToServer(serverWithAuth, event.sender);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error refreshing servers:', error);
+        return false;
     }
-    
+});
+
+// Add settings handlers
+ipcMain.handle('load-settings', async () => {
+    return await configManager.loadSettings();
+});
+
+ipcMain.handle('save-settings', async (event, settings) => {
+    await configManager.saveSettings(settings);
     return true;
 });
 

@@ -40,6 +40,27 @@ class ConfigManager {
             await this.saveConfig(config);
         }
     }
+
+    async loadSettings() {
+        const config = await this.loadConfig();
+        return config.settings || {
+            theme: 'dark',
+            fontSize: 14,
+            reduceMotion: false,
+            highContrast: false,
+            notifications: {
+                enabled: true,
+                messages: true,
+                statusChanges: true
+            }
+        };
+    }
+
+    async saveSettings(settings) {
+        const config = await this.loadConfig();
+        config.settings = settings;
+        await this.saveConfig(config);
+    }
 }
 
 module.exports = new ConfigManager();

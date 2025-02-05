@@ -32,7 +32,9 @@ class ChatServer:
         self.users: Dict[str, User] = {}
         self.channels: Dict[str, Set[str]] = {}
         self.db = Database()
+        self.offline_users = set()  # Track offline users
         asyncio.create_task(self.init_channels())
+        asyncio.create_task(self.init_users())
 
     async def init_channels(self):
         """Initialize channels from database."""
@@ -40,6 +42,11 @@ class ChatServer:
         for channel in channels:
             self.channels[channel] = set()
         logger.info(f"Initialized channels: {list(self.channels.keys())}")
+
+    async def init_users(self):
+        """Initialize users from database."""
+        self.offline_users = set(await self.db.get_all_users())
+        logger.info(f"Initialized offline users: {self.offline_users}")
 
     async def register_user(self, username: str, password: str, websocket) -> bool:
         logger.info(f"Attempting to register user: {username}")
@@ -62,6 +69,7 @@ class ChatServer:
                 # When a user joins, add them to all channels
                 for channel in self.channels.keys():
                     self.channels[channel].add(username)
+                self.offline_users.discard(username)  # Remove from offline users
                 return True
             return True
         return False
@@ -76,6 +84,19 @@ class ChatServer:
                         await user.websocket.send(json.dumps(message))
                     except Exception as e:
                         logger.error(f"Error broadcasting to {username}: {e}")
+
+    async def broadcast_user_status(self, username: str, status: str):
+        """Broadcast user status change to all connected users."""
+        message = {
+            "type": "user_status",
+            "username": username,
+            "status": status
+        }
+        for user in self.users.values():
+            try:
+                await user.websocket.send(json.dumps(message))
+            except Exception as e:
+                logger.error(f"Error broadcasting status to {user.username}: {e}")
 
     async def handle_message(self, websocket, message_data: dict):
         message_type = message_data.get("type")
@@ -129,8 +150,11 @@ class ChatServer:
                     "username": username,
                     "channels": list(self.channels.keys()),
                     "history": history,  # Include message history
-                    "current_channel": "general"
+                    "current_channel": "general",
+                    "online_users": list(self.users.keys()),
+                    "offline_users": list(self.offline_users)
                 }
+                await self.broadcast_user_status(username, "online")
             else:
                 response = {
                     "type": "auth_response",
@@ -191,6 +215,8 @@ class ChatServer:
             for username, user in list(self.users.items()):
                 if user.websocket == websocket:
                     del self.users[username]
+                    self.offline_users.add(username)  # Add to offline users
+                    await self.broadcast_user_status(username, "offline")
                     for channel in self.channels.values():
                         channel.discard(username)
                     break

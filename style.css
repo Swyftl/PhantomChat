@@ -1,3 +1,5 @@
+@import 'themes.css';
+
 * {
     margin: 0;
     padding: 0;
@@ -7,14 +9,14 @@
 body {
     display: flex;
     height: 100vh;
-    background-color: #36393f;
-    color: #dcddde;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 #servers-container {
     width: 72px;
-    background-color: #202225;
+    background-color: var(--bg-tertiary);
     padding: 12px 0;
     display: flex;
     flex-direction: column;
@@ -67,23 +69,23 @@ body {
 .server-icon {
     width: 48px;
     height: 48px;
-    background-color: #36393f;
+    background-color: var(--bg-secondary);
     border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: border-radius 0.2s;
-    color: #dcddde;
+    color: var(--text-primary);
 }
 
 .server-icon:hover {
     border-radius: 16px;
-    background-color: #5865f2;
+    background-color: var(--accent-color);
 }
 
 .server-icon.active {
-    background-color: #5865f2;
+    background-color: var(--accent-color);
     border-radius: 16px;
 }
 
@@ -533,3 +535,140 @@ select:focus {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    animation: slideIn 0.3s ease-out;
+    max-width: 300px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.notification.error {
+    background-color: #f04747;
+}
+
+.notification.success {
+    background-color: #43b581;
+}
+
+.notification.info {
+    background-color: #7289da;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ...existing code... */
+
+.users-section {
+    margin-bottom: 20px;
+}
+
+.users-section-header {
+    color: #8e9297;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px;
+    margin-bottom: 4px;
+}
+
+.user-status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.user-status-indicator.online {
+    background-color: #43b581;
+}
+
+.user-status-indicator.offline {
+    background-color: #747f8d;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #dcddde;
+    transition: background-color 0.2s;
+}
+
+.user:hover {
+    background-color: #36393f;
+}
+
+.user span {
+    margin-left: 8px;
+}
+
+/* ...existing code... */
+
+.settings-footer {
+    padding: 16px;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--bg-tertiary);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.settings-footer button {
+    padding: 8px 16px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.settings-footer .submit-btn {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.settings-footer .submit-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.settings-footer .back-btn {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.settings-footer .back-btn:hover {
+    background-color: var(--bg-primary);
+}
+
+/* ...existing code... */

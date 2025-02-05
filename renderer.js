@@ -4,8 +4,28 @@ document.addEventListener('DOMContentLoaded', () => {
         currentServer: null,
         currentUsername: '',
         currentChannel: 'general',
-        servers: new Map()
+        servers: new Map(),
+        online_users: [],
+        offline_users: []
     };
+
+    // Add notification system
+    function showNotification(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('notification-container');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        container.appendChild(notification);
+        
+        // Remove notification after duration
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                container.removeChild(notification);
+            }, 300);
+        }, duration);
+    }
 
     // Modal loading function
     async function loadModal(modalName) {
@@ -110,12 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add registration status handler
         window.electronAPI.onRegistrationStatus((status) => {
             if (status.success) {
-                alert('Registration successful! You can now login.');
+                showNotification('Registration successful! You can now login.', 'success');
                 // Switch to login tab
                 const loginTab = modal.querySelector('.auth-tab[data-tab="login"]');
                 loginTab.click();
             } else {
-                alert(`Registration failed: ${status.error || 'Unknown error'}`);
+                showNotification(`Registration failed: ${status.error || 'Unknown error'}`, 'error');
             }
         });
 
@@ -126,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmPassword = document.getElementById('register-confirm-password').value;
 
             if (password !== confirmPassword) {
-                alert('Passwords do not match');
+                showNotification('Passwords do not match', 'error');
                 return;
             }
 
@@ -148,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Save connection details for login after registration
             window.electronAPI.onRegistrationStatus((status) => {
                 if (status.success) {
-                    alert('Registration successful! Please log in.');
+                    showNotification('Registration successful! Please log in.', 'success');
                     // Switch to login tab and pre-fill username
                     const loginTab = modal.querySelector('.auth-tab[data-tab="login"]');
                     loginTab.click();
@@ -157,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Restore connection details
                     serverDetails = { ...connectionDetails };
                 } else {
-                    alert(`Registration failed: ${status.error || 'Unknown error'}`);
+                    showNotification(`Registration failed: ${status.error || 'Unknown error'}`, 'error');
                 }
             });
         });
@@ -190,6 +210,68 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeSettings = modal.querySelector('.close-settings');
         const settingsSections = modal.querySelectorAll('.settings-section');
         const settingsPanels = modal.querySelectorAll('.settings-panel');
+        const applyButton = modal.querySelector('#apply-settings');
+        const resetButton = modal.querySelector('#reset-settings');
+        let currentSettings = {};
+
+        // Load current settings
+        window.electronAPI.loadSettings().then(settings => {
+            currentSettings = { ...settings };
+            updateSettingsUI(currentSettings);
+        });
+
+        function updateSettingsUI(settings) {
+            const themeSelect = document.getElementById('theme-select');
+            if (themeSelect) themeSelect.value = settings.theme;
+            
+            const fontSize = document.getElementById('font-size');
+            if (fontSize) fontSize.value = settings.fontSize;
+            
+            const reduceMotion = document.getElementById('reduce-motion');
+            if (reduceMotion) reduceMotion.checked = settings.reduceMotion;
+            
+            const highContrast = document.getElementById('high-contrast');
+            if (highContrast) highContrast.checked = settings.highContrast;
+            
+            const notifications = settings.notifications || {};
+            const enableNotifications = document.getElementById('enable-notifications');
+            if (enableNotifications) enableNotifications.checked = notifications.enabled;
+            
+            const messageNotifications = document.getElementById('message-notifications');
+            if (messageNotifications) messageNotifications.checked = notifications.messages;
+            
+            const statusNotifications = document.getElementById('status-notifications');
+            if (statusNotifications) statusNotifications.checked = notifications.statusChanges;
+        }
+
+        function getSettingsFromUI() {
+            return {
+                theme: document.getElementById('theme-select').value,
+                fontSize: parseInt(document.getElementById('font-size').value),
+                reduceMotion: document.getElementById('reduce-motion').checked,
+                highContrast: document.getElementById('high-contrast').checked,
+                notifications: {
+                    enabled: document.getElementById('enable-notifications').checked,
+                    messages: document.getElementById('message-notifications').checked,
+                    statusChanges: document.getElementById('status-notifications').checked
+                }
+            };
+        }
+
+        // Apply button handler
+        applyButton.addEventListener('click', async () => {
+            const newSettings = getSettingsFromUI();
+            await window.electronAPI.saveSettings(newSettings);
+            applySettings(newSettings);
+            currentSettings = { ...newSettings };
+            showNotification('Settings applied successfully', 'success');
+        });
+
+        // Reset button handler
+        resetButton.addEventListener('click', () => {
+            updateSettingsUI(currentSettings);
+            showNotification('Settings reset to previous values', 'info');
+        });
 
         // Open settings
         settingsBtn.addEventListener('click', () => {
@@ -305,8 +387,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.currentUsername = status.username;
                 document.getElementById('current-username').textContent = status.username;
             }
+            showNotification(`Connected to server as ${status.username}`, 'success');
+            
+            // Store user lists in state
+            state.online_users = status.online_users || [];
+            state.offline_users = status.offline_users || [];
+            
+            // Update users list UI
+            updateUsersList(state.online_users, state.offline_users);
         } else {
-            alert('Failed to connect to server');
+            showNotification('Failed to connect to server', 'error');
         }
     });
 
@@ -360,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageInput.value = '';
             } else {
                 console.error('No active server connection');
-                alert('Please connect to a server first');
+                showNotification('Please connect to a server first', 'error');
             }
         }
     });
@@ -443,22 +533,131 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add refresh button handler
     const refreshBtn = document.getElementById('refresh-servers');
     refreshBtn.addEventListener('click', async () => {
-        // Add spinning animation
         refreshBtn.classList.add('refreshing');
         
-        // Clear current servers
+        // Only clear visual elements, keep state
         const serversList = document.querySelector('.servers-list');
         serversList.innerHTML = '';
-        state.servers.clear();
 
         try {
-            // Request server refresh
             await window.electronAPI.refreshServers();
         } finally {
-            // Remove spinning animation after a minimum time
             setTimeout(() => {
                 refreshBtn.classList.remove('refreshing');
             }, 500);
         }
+    });
+
+    function updateUsersList(onlineUsers = [], offlineUsers = []) {
+        const usersContainer = document.getElementById('users-list');
+        usersContainer.innerHTML = '';
+
+        // Online users section
+        if (onlineUsers.length > 0) {
+            const onlineSection = document.createElement('div');
+            onlineSection.className = 'users-section';
+            onlineSection.innerHTML = `<h4 class="users-section-header">ONLINE — ${onlineUsers.length}</h4>`;
+            
+            onlineUsers.forEach(username => {
+                onlineSection.innerHTML += `
+                    <div class="user">
+                        <div class="user-status-indicator online"></div>
+                        <span>${username}</span>
+                    </div>
+                `;
+            });
+            usersContainer.appendChild(onlineSection);
+        }
+
+        // Offline users section
+        if (offlineUsers.length > 0) {
+            const offlineSection = document.createElement('div');
+            offlineSection.className = 'users-section';
+            offlineSection.innerHTML = `<h4 class="users-section-header">OFFLINE — ${offlineUsers.length}</h4>`;
+            
+            offlineUsers.forEach(username => {
+                offlineSection.innerHTML += `
+                    <div class="user">
+                        <div class="user-status-indicator offline"></div>
+                        <span>${username}</span>
+                    </div>
+                `;
+            });
+            usersContainer.appendChild(offlineSection);
+        }
+
+        // Update header count
+        document.querySelector('#users-header h3').textContent = 
+            `USERS — ${onlineUsers.length + offlineUsers.length}`;
+    }
+
+    // Add user status handler
+    window.electronAPI.onUserStatus((data) => {
+        if (data.status === 'online') {
+            // Remove from offline, add to online
+            state.offline_users = state.offline_users.filter(u => u !== data.username);
+            if (!state.online_users.includes(data.username)) {
+                state.online_users.push(data.username);
+            }
+        } else {
+            // Remove from online, add to offline
+            state.online_users = state.online_users.filter(u => u !== data.username);
+            if (!state.offline_users.includes(data.username)) {
+                state.offline_users.push(data.username);
+            }
+        }
+
+        // Update UI
+        updateUsersList(state.online_users, state.offline_users);
+        showNotification(`${data.username} is now ${data.status}`, 'info');
+    });
+
+    function applySettings(settings) {
+        // Apply theme
+        document.body.className = `theme-${settings.theme}`;
+        
+        // Apply font size
+        document.documentElement.style.setProperty('--message-font-size', `${settings.fontSize}px`);
+        
+        // Apply motion preferences
+        if (settings.reduceMotion) {
+            document.body.classList.add('reduce-motion');
+        } else {
+            document.body.classList.remove('reduce-motion');
+        }
+        
+        // Apply high contrast if needed
+        if (settings.highContrast) {
+            document.body.classList.add('theme-contrast');
+        }
+    }
+
+    // Initialize settings
+    window.electronAPI.loadSettings().then(settings => {
+        applySettings(settings);
+        
+        // Update settings UI
+        const themeSelect = document.getElementById('theme-select');
+        if (themeSelect) themeSelect.value = settings.theme;
+        
+        const fontSize = document.getElementById('font-size');
+        if (fontSize) fontSize.value = settings.fontSize;
+        
+        const reduceMotion = document.getElementById('reduce-motion');
+        if (reduceMotion) reduceMotion.checked = settings.reduceMotion;
+        
+        const highContrast = document.getElementById('high-contrast');
+        if (highContrast) highContrast.checked = settings.highContrast;
+        
+        // Set notification preferences
+        const notifications = settings.notifications || {};
+        const enableNotifications = document.getElementById('enable-notifications');
+        if (enableNotifications) enableNotifications.checked = notifications.enabled;
+        
+        const messageNotifications = document.getElementById('message-notifications');
+        if (messageNotifications) messageNotifications.checked = notifications.messages;
+        
+        const statusNotifications = document.getElementById('status-notifications');
+        if (statusNotifications) statusNotifications.checked = notifications.statusChanges;
     });
 });

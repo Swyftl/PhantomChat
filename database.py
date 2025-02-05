@@ -150,3 +150,14 @@ class Database:
         except Exception as e:
             logger.error(f"Error adding channel: {e}")
             return False
+
+    async def get_all_users(self) -> list:
+        """Get all registered users."""
+        try:
+            async with aiosqlite.connect(self.db_file) as db:
+                async with db.execute('SELECT username FROM users') as cursor:
+                    users = await cursor.fetchall()
+                    return [user[0] for user in users]
+        except Exception as e:
+            logger.error(f"Error getting users: {e}")
+            return []

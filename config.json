@@ -12,5 +12,16 @@
       "username": null,
       "password": null
     }
-  ]
+  ],
+  "settings": {
+    "theme": "dark",
+    "fontSize": 12,
+    "reduceMotion": false,
+    "highContrast": false,
+    "notifications": {
+      "enabled": true,
+      "messages": true,
+      "statusChanges": true
+    }
+  }
 }

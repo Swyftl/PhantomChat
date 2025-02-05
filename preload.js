@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     loadModalFile: (modalName) => ipcRenderer.invoke('load-modal-file', modalName),
     requestChannelHistory: (data) => ipcRenderer.send('request-channel-history', data),
     refreshServers: () => ipcRenderer.invoke('refresh-servers'),
+    loadSettings: () => ipcRenderer.invoke('load-settings'),
+    saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
     
     // Event listeners
     onServerConnection: (callback) => 
@@ -21,5 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onServerAdded: (callback) =>
         ipcRenderer.on('server-added', (_, server) => callback(server)),
     onChannelHistory: (callback) => 
-        ipcRenderer.on('channel-history', (_, data) => callback(data))
+        ipcRenderer.on('channel-history', (_, data) => callback(data)),
+    onUserStatus: (callback) =>
+        ipcRenderer.on('user-status', (_, data) => callback(data))
 });

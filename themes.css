@@ -1,0 +1,63 @@
+/* Dark Theme (Default) */
+.theme-dark {
+    --bg-primary: #36393f;
+    --bg-secondary: #2f3136;
+    --bg-tertiary: #202225;
+    --text-primary: #dcddde;
+    --text-secondary: #8e9297;
+    --accent-color: #5865f2;
+    --accent-hover: #4752c4;
+    --danger-color: #f04747;
+    --success-color: #43b581;
+    --info-color: #7289da;
+    --input-bg: #40444b;
+    --input-border: #202225;
+}
+
+/* Light Theme */
+.theme-light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f2f3f5;
+    --bg-tertiary: #e3e5e8;
+    --text-primary: #2e3338;
+    --text-secondary: #747f8d;
+    --accent-color: #5865f2;
+    --accent-hover: #4752c4;
+    --danger-color: #f04747;
+    --success-color: #43b581;
+    --info-color: #7289da;
+    --input-bg: #ffffff;
+    --input-border: #dcddde;
+}
+
+/* Midnight Theme */
+.theme-midnight {
+    --bg-primary: #1a1b1e;
+    --bg-secondary: #141517;
+    --bg-tertiary: #0c0c0d;
+    --text-primary: #ffffff;
+    --text-secondary: #989aa2;
+    --accent-color: #7289da;
+    --accent-hover: #5b6eae;
+    --danger-color: #f04747;
+    --success-color: #43b581;
+    --info-color: #7289da;
+    --input-bg: #1a1b1e;
+    --input-border: #2f3136;
+}
+
+/* High Contrast Theme */
+.theme-contrast {
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --accent-color: #ffff00;
+    --accent-hover: #e5e500;
+    --danger-color: #ff0000;
+    --success-color: #00ff00;
+    --info-color: #00ffff;
+    --input-bg: #000000;
+    --input-border: #ffffff;
+}

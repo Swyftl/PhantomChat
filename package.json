@@ -31,7 +31,17 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "ignore": [
+          "./dist$",
+          "./__pycache__$",
+          ".gitnore$",
+          ".py",
+          ".pyc",
+          ".py",
+          ".exe"
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
