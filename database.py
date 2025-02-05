@@ -1,14 +1,17 @@
-import logging  # Add this import
+import logging
 import sqlite3
 import aiosqlite
 import asyncio
+import os
 from datetime import datetime
+from config_loader import load_config
 
 logger = logging.getLogger(__name__)
 
 class Database:
-    def __init__(self, db_file="chat.db"):
-        self.db_file = db_file
+    def __init__(self, db_file=None):
+        config = load_config()
+        self.db_file = db_file or config['DB_FILE']
         self.init_database()
 
     def init_database(self):

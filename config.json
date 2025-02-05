@@ -5,6 +5,12 @@
       "port": "8080",
       "username": "test",
       "password": "test123"
+    },
+    {
+      "ip": "127.0.0.1",
+      "port": "8080",
+      "username": null,
+      "password": null
     }
   ]
 }

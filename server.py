@@ -6,7 +6,14 @@ from websockets.exceptions import ConnectionClosedOK
 from dataclasses import dataclass, asdict
 from typing import Dict, Set
 from database import Database
+from config_loader import load_config
 import datetime
+
+# Load configuration
+config = load_config()
+SERVER_HOST = config['SERVER_HOST']
+SERVER_PORT = int(config['SERVER_PORT'])
+DB_FILE = config['DB_FILE']
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG,
@@ -192,8 +199,8 @@ class ChatServer:
 
 async def main():
     server = ChatServer()
-    logger.info("Starting server on ws://localhost:8080")
-    async with serve(server.handle_connection, "localhost", 8080):
+    logger.info(f"Starting server on ws://{SERVER_HOST}:{SERVER_PORT}")
+    async with serve(server.handle_connection, SERVER_HOST, SERVER_PORT):
         await asyncio.Future()  # run forever
 
 if __name__ == "__main__":
